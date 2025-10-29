@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
+import { signPayload } from "./core/auth.js";
 
 async function main() {
 	// requirements
@@ -12,9 +13,11 @@ async function main() {
 	app.use(cors());
 
 	try {
-		await mongoose.connect("mongodb://127.0.0.1:27017/ocr");
+		await mongoose.connect(
+			"mongodb://root:root123@127.0.0.1:27018/ocr?authSource=admin"
+		);
 		mongoose.connection.on("connected", () => {
-			console.log("Dabase connected!");
+			console.log("Database connected!");
 		});
 
 		app.listen(port, () => {
@@ -23,7 +26,6 @@ async function main() {
 	} catch (error) {
 		throw error;
 	}
-	// Database connection
 }
 
 main()

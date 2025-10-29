@@ -7,7 +7,7 @@ const documentTagSchema = new Schema(
 		isPrimary: Boolean,
 		createtAt: {
 			type: Date,
-			default: Date.now(),
+			default: Date.now,
 		},
 	},
 	{ timestamps: true }

@@ -6,9 +6,13 @@ const documentSchema = new Schema(
 		filename: String,
 		mime: String,
 		textContent: String,
+		folderId: {
+			type: String,
+			default: null,
+		},
 		createdAt: {
 			type: Date,
-			default: Date.now(),
+			default: Date.now,
 		},
 	},
 	{ timestamps: true }

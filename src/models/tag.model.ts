@@ -6,7 +6,7 @@ const tagSchema = new Schema(
 		ownerId: String,
 		createdAt: {
 			type: Date,
-			default: Date.now(),
+			default: Date.now,
 		},
 	},
 	{ timestamps: true }

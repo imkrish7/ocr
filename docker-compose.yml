@@ -1,0 +1,14 @@
+services:
+    mongo:
+        image: mongodb/mongodb-community-server:6.0-ubi8
+        restart: always
+        container_name: ocr-mongo
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root123
+        ports:
+            - 27018:27017
+        volumes:
+            - type: bind
+              source: ./data
+              target: /data/db
