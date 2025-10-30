@@ -1,0 +1,9 @@
+exit
+show collections;
+use ocr;
+;
+show dbs
+exit
+show dbs;
+exit
+show dbs;

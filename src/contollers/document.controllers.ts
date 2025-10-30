@@ -4,6 +4,7 @@ import { DocumentModel } from "../models/document.model.ts";
 import { FolderModel } from "../models/folder.model.ts";
 import { TagModel } from "../models/tag.model.ts";
 import { DocumentTagModel } from "../models/documentTag.model.ts";
+import type { IDocument } from "../typesandinterfaces/document.ts";
 
 export const createDocumentController = async (
 	request: Request,
@@ -99,8 +100,111 @@ export const getFoldersController = async (
 ) => {
 	try {
 		// first fetch all primary documentTags now join with document groupby folderid and primaryTag then perform count on it
+		const files = await DocumentModel.aggregate([
+			{
+				$lookup: {
+					from: "documentTags",
+					localField: "_id",
+					foreignField: "documentId",
+					let: { isPrimary: "$isPrimary" },
+					as: "documentListWithTag",
+					pipeline: [
+						{
+							$match: {
+								$expr: { $eq: ["$$isPrimary", true] },
+							},
+						},
+					],
+				},
+			},
+			{ $unwind: "$documentListWithTag" },
+			{
+				$lookup: {
+					from: "folders",
+					localField: "folderId",
+					foreignField: "_id",
+					as: "documentWithFolder",
+				},
+			},
+			{ $unwind: "$documentWithFolder" },
+			{
+				$group: {
+					_id: {
+						folderId: "$documentWithFolder.folderId",
+						folderName: "$documentWithFolder.name",
+					},
+					documentCount: { $sum: 1 },
+				},
+			},
+		]);
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const getDocumentWithTagController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const { tag } = request.params;
+		if (!tag) {
+			return response.status(400).json({ error: "Bad request" });
+		}
+
+		const isTagExist = await TagModel.findOne({ name: tag });
+		if (!isTagExist) {
+			return response.status(404).json({ error: "Tag does not exist!" });
+		}
+
+		const documentWithTags = await DocumentTagModel.aggregate([
+			{
+				$match: {
+					tagId: isTagExist._id.toString(),
+					isPrimary: true,
+				},
+			},
+			{
+				$lookup: {
+					from: "documents",
+					localField: "documentId",
+					foreignField: "_id",
+					as: "documentsWithTag",
+				},
+			},
+		]);
+		return response.status(200).json({ data: documentWithTags });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
+	}
+};
+
+export const getDocumentWithFilters = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const { q } = request.query;
+		let documents: IDocument[];
+		if (Array.isArray(q)) {
+			documents = await DocumentModel.find({
+				_id: {
+					$in: q,
+				},
+			});
+		} else if (q instanceof String && q.length > 0) {
+			documents = await DocumentModel.find({
+				folderId: q,
+			});
+		} else {
+			documents = [];
+		}
+
+		return response.status(200).json({ data: documents });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
 	}
 };
