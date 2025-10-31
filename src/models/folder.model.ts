@@ -1,9 +1,10 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 
 const folderSchema = new Schema(
 	{
 		name: String,
 		parentId: String,
+		ownerId: Types.ObjectId,
 	},
 	{ timestamps: true }
 );

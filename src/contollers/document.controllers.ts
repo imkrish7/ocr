@@ -4,7 +4,7 @@ import { DocumentModel } from "../models/document.model.ts";
 import { FolderModel } from "../models/folder.model.ts";
 import { TagModel } from "../models/tag.model.ts";
 import { DocumentTagModel } from "../models/documentTag.model.ts";
-import type { IDocument } from "../typesandinterfaces/document.ts";
+import type { IDocument } from "../types/document.ts";
 
 export const createDocumentController = async (
 	request: Request,

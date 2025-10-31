@@ -1,5 +1,5 @@
 import * as jose from "jose";
-import type { JWTPayload } from "../typesandinterfaces/auth.ts";
+import type { JWTPayload } from "../types/auth.ts";
 
 // const payload = {
 // 	email: "singhkrishk07@gmail.com",
@@ -21,4 +21,14 @@ export const signPayload = async (payload: JWTPayload) => {
 		.setExpirationTime("2h")
 		.sign(secret);
 	return jwt;
+};
+
+export const verifyToken = async (token: string): Promise<JWTPayload> => {
+	try {
+		const secret = await getSecret();
+		const { payload } = await jose.jwtVerify<JWTPayload>(token, secret);
+		return payload;
+	} catch (error) {
+		throw error;
+	}
 };

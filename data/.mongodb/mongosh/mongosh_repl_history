@@ -1,3 +1,4 @@
+show dbs;
 exit
 show collections;
 use ocr;
