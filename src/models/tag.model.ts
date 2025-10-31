@@ -4,10 +4,6 @@ const tagSchema = new Schema(
 	{
 		name: String,
 		ownerId: String,
-		createdAt: {
-			type: Date,
-			default: Date.now,
-		},
 	},
 	{ timestamps: true }
 );

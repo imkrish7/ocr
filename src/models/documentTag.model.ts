@@ -5,10 +5,6 @@ const documentTagSchema = new Schema(
 		documentId: String,
 		tagId: String,
 		isPrimary: Boolean,
-		createtAt: {
-			type: Date,
-			default: Date.now,
-		},
 	},
 	{ timestamps: true }
 );

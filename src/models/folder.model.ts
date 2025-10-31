@@ -4,10 +4,6 @@ const folderSchema = new Schema(
 	{
 		name: String,
 		parentId: String,
-		createdAt: {
-			type: Date,
-			default: Date.now,
-		},
 	},
 	{ timestamps: true }
 );

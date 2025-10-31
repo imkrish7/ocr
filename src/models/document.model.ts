@@ -1,19 +1,16 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 
 const documentSchema = new Schema(
 	{
-		ownerId: String,
+		ownerId: Types.ObjectId,
 		filename: String,
 		mime: String,
 		textContent: String,
 		folderId: {
-			type: String,
+			type: Types.ObjectId,
 			default: null,
 		},
-		createdAt: {
-			type: Date,
-			default: Date.now,
-		},
+		meta: Schema.Types.Mixed,
 	},
 	{ timestamps: true }
 );

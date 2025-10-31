@@ -5,10 +5,6 @@ const userSchema = new Schema(
 		email: String,
 		password: String,
 		name: String,
-		createdAt: {
-			type: Date,
-			default: Date.now,
-		},
 	},
 	{ timestamps: true }
 );

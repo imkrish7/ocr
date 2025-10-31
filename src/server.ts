@@ -20,6 +20,10 @@ async function main() {
 			console.log("Database connected!");
 		});
 
+		mongoose.connection.on("error", (error) => {
+			console.error(error);
+		});
+
 		app.listen(port, () => {
 			console.log("Server is running on port: ", port);
 		});
