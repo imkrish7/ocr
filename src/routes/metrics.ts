@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { ocrController } from "../contollers/webhook.controllers.ts";
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
+import { metricsController } from "../contollers/metrics.controller.ts";
 
 const routes = Router();
 
-routes.post(
-	"/webhooks/ocr",
+routes.get(
+	"/metrics",
 	authMiddleware,
 	roleMiddleware(["admin", "user"]),
-	ocrController
+	metricsController
 );
 
-export { routes as webhookRoutes };
+export { routes as metricsRoutes };

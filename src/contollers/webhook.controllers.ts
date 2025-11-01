@@ -3,6 +3,8 @@ import { webhookSchema } from "../schema/webhook.ts";
 import { DocumentModel } from "../models/document.model.ts";
 import { getMimeType } from "../utils/mimeType.ts";
 import { TaskModel } from "../models/task.model.ts";
+import { auditActivity } from "../services/auditLogService.ts";
+import { Types } from "mongoose";
 
 export const ocrController = async (request: Request, response: Response) => {
 	try {
@@ -28,6 +30,12 @@ export const ocrController = async (request: Request, response: Response) => {
 			});
 
 			await newDocument.save();
+			await auditActivity({
+				userId: new Types.ObjectId(request.user?.sub),
+				entityId: newDocument._id.toString(),
+				entityType: "document",
+				action: ["Document created"],
+			});
 			return response.status(201).json({
 				message: "New document created in root folder",
 				type: "document",
@@ -65,6 +73,12 @@ export const ocrController = async (request: Request, response: Response) => {
 				userId: request.user?.sub,
 			});
 			await newTask.save();
+			await auditActivity({
+				userId: new Types.ObjectId(request.user?.sub),
+				entityId: newTask._id.toString(),
+				entityType: "task",
+				action: ["task created"],
+			});
 			return response
 				.status(201)
 				.json({ message: "New task has been created!" });

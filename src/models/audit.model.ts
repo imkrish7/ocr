@@ -6,7 +6,10 @@ const auditLogSchema = new Schema(
 		action: String,
 		entityId: Types.ObjectId,
 		entityType: String,
-		metaData: Schema.Types.Mixed,
+		metaData: {
+			type: Schema.Types.Mixed,
+			required: false,
+		},
 	},
 	{
 		timestamps: true,

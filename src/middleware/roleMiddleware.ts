@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { AccessControlModel } from "../models/accessControl.model.ts";
+import { RoleModel } from "../models/role.model.ts";
 
 export const roleMiddleware = (
 	requiredRoles: string[] = [],
@@ -12,7 +12,15 @@ export const roleMiddleware = (
 				return response.status(401).json({ error: "Unauthorized" });
 			}
 
-			if (requiredRoles.indexOf(user.role) < 0) {
+			const userRole = await RoleModel.findById(user.role);
+
+			if (!userRole) {
+				return response
+					.status(403)
+					.json({ error: "Permission denied!" });
+			}
+
+			if (requiredRoles.indexOf(userRole.name) < 0) {
 				return response
 					.status(403)
 					.json({ error: "Permission denied!" });

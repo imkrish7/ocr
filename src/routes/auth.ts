@@ -8,3 +8,5 @@ const routes = Router();
 
 routes.post("/login", loginController);
 routes.post("/signup", signupController);
+
+export { routes as authRoutes };

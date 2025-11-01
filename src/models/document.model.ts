@@ -10,7 +10,7 @@ const documentSchema = new Schema(
 			type: Types.ObjectId,
 			default: null,
 		},
-		meta: Schema.Types.Mixed,
+		metadata: Schema.Types.Mixed,
 	},
 	{ timestamps: true }
 );

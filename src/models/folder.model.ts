@@ -5,6 +5,7 @@ const folderSchema = new Schema(
 		name: String,
 		parentId: String,
 		ownerId: Types.ObjectId,
+		metadata: Schema.Types.Mixed,
 	},
 	{ timestamps: true }
 );

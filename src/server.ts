@@ -1,7 +1,13 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { signPayload } from "./core/auth.js";
+
+// routes
+import { authRoutes } from "./routes/auth.ts";
+import { metricsRoutes } from "./routes/metrics.ts";
+import { actionRoutes } from "./routes/action.ts";
+import { webhookRoutes } from "./routes/webhooks.ts";
+import { documentRoutes } from "./routes/document.ts";
 
 async function main() {
 	// requirements
@@ -23,6 +29,12 @@ async function main() {
 		mongoose.connection.on("error", (error) => {
 			console.error(error);
 		});
+
+		app.use("/v1", documentRoutes);
+		app.use("/v1", metricsRoutes);
+		app.use("/v1/auth", authRoutes);
+		app.use("/v1/action", actionRoutes);
+		app.use("/v1/webhooks", webhookRoutes);
 
 		app.listen(port, () => {
 			console.log("Server is running on port: ", port);

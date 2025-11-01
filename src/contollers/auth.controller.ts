@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { loginSchema, signupSchema } from "../schema/auth.ts";
 import { UserModel } from "../models/user.model.ts";
 import { signPayload } from "../core/auth.ts";
+import { AccessControlModel } from "../models/accessControl.model.ts";
 
 export const loginController = async (request: Request, response: Response) => {
 	try {
@@ -22,9 +23,14 @@ export const loginController = async (request: Request, response: Response) => {
 			return response.status(401).json({ error: "Wrong password!" });
 		}
 
+		const accessControl = await AccessControlModel.findOne({
+			usrId: isUserExist._id,
+		});
+
 		const accessToken = await signPayload({
 			email: isUserExist.email!,
-			id: isUserExist._id.toString(),
+			sub: isUserExist._id.toString(),
+			role: accessControl?.roleId.toString()!,
 		});
 
 		return response.status(200).json({ accessToken });

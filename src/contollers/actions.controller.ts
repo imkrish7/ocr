@@ -3,6 +3,8 @@ import { runActionSchema } from "../schema/action.ts";
 import { FolderModel } from "../models/folder.model.ts";
 import { DocumentModel } from "../models/document.model.ts";
 import { UsageModel } from "../models/usage.model.ts";
+import { auditActivity } from "../services/auditLogService.ts";
+import { Types } from "mongoose";
 
 export const runActionController = async (
 	request: Request,
@@ -17,12 +19,12 @@ export const runActionController = async (
 		const validateData = validateRequest.data;
 		let resource;
 		if (validateData.scope.type == "folder") {
-			resource = await FolderModel.find({
+			resource = await FolderModel.findOne({
 				name: validateData.scope.name,
 				ownerId: request.user?.sub,
 			});
 		} else if (validateData.scope.type == "document") {
-			resource = await DocumentModel.find({
+			resource = await DocumentModel.findOne({
 				filename: validateData.scope.name,
 				ownerId: request.user?.sub,
 			});
@@ -45,6 +47,14 @@ export const runActionController = async (
 
 		await actionUsageCredit.save();
 
+		await auditActivity({
+			userId: new Types.ObjectId(request.user?.sub),
+			entityId: resource._id.toString(),
+			entityType: validateData.scope.name,
+			action: [...validateData.actions],
+			metadata: resource.metadata ?? {},
+		});
+
 		return response.status(200).json({ message: "file has been created!" });
 	} catch (error) {
 		console.error(error);
@@ -52,7 +62,10 @@ export const runActionController = async (
 	}
 };
 
-export const getCreditUsages = async (request: Request, response: Response) => {
+export const getCreditUsagesController = async (
+	request: Request,
+	response: Response
+) => {
 	try {
 		const user = request.user;
 

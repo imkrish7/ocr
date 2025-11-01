@@ -5,6 +5,8 @@ import { FolderModel } from "../models/folder.model.ts";
 import { TagModel } from "../models/tag.model.ts";
 import { DocumentTagModel } from "../models/documentTag.model.ts";
 import type { IDocument } from "../types/document.ts";
+import { auditActivity } from "../services/auditLogService.ts";
+import { Types } from "mongoose";
 
 export const createDocumentController = async (
 	request: Request,
@@ -86,6 +88,14 @@ export const createDocumentController = async (
 			);
 			await DocumentTagModel.insertMany(secondaryTagsDocs);
 		}
+
+		await auditActivity({
+			userId: new Types.ObjectId(request.user?.sub),
+			entityId: newDocument._id.toString(),
+			entityType: "document",
+			action: ["document created"],
+			metadata: newDocument.metadata,
+		});
 
 		return response.status(201).json({ data: newDocument });
 	} catch (error) {
