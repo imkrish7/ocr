@@ -1,7 +1,6 @@
 import z from "zod";
 
 export const documentSchema = z.object({
-	name: z.string(),
 	mime: z.string(),
 	filename: z.string(),
 	textContent: z.string(),
