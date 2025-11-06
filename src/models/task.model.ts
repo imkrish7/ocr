@@ -9,7 +9,7 @@ const taskSchema = new Schema(
 		},
 		target: String,
 		channel: String,
-		userId: Types.ObjectId,
+		userId: Schema.ObjectId,
 	},
 	{ timestamps: true }
 );

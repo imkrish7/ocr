@@ -2,12 +2,13 @@ import { Schema, Types, model } from "mongoose";
 
 const documentSchema = new Schema(
 	{
-		ownerId: Types.ObjectId,
+		ownerId: Schema.ObjectId,
+		createdBy: Schema.ObjectId,
 		filename: String,
 		mime: String,
 		textContent: String,
 		folderId: {
-			type: Types.ObjectId,
+			type: Schema.ObjectId,
 			default: null,
 		},
 		metadata: Schema.Types.Mixed,

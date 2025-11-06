@@ -10,7 +10,6 @@ import { roleMiddleware } from "../middleware/roleMiddleware.ts";
 
 const routes = Router();
 
-// routes.post()
 routes.post(
 	"/docs",
 	authMiddleware,
@@ -20,19 +19,19 @@ routes.post(
 routes.get(
 	"/folders",
 	authMiddleware,
-	roleMiddleware(["admin", "user"]),
+	roleMiddleware(["admin", "user", "moderator", "support"]),
 	getFoldersController
 );
 routes.get(
 	"/folders/{:id}/docs",
 	authMiddleware,
-	roleMiddleware(["admin", "user"]),
+	roleMiddleware(["admin", "user", "moderator", "support"]),
 	getDocumentWithTagController
 );
 routes.get(
 	"/search",
 	authMiddleware,
-	roleMiddleware(["admin", "user"]),
+	roleMiddleware(["admin", "user", "moderator", "support"]),
 	getDocumentWithFilters
 );
 

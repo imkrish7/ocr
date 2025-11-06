@@ -2,14 +2,14 @@ import { Schema, Types, model } from "mongoose";
 
 const accessControlSchema = new Schema(
 	{
-		userId: { type: Types.ObjectId, required: true },
-		roleId: { type: Types.ObjectId, required: true },
+		userId: { type: Schema.ObjectId, required: true },
+		roleId: { type: Schema.ObjectId, required: true },
 		resourceType: {
 			type: String,
 			enum: ["folder", "document"],
 			required: true,
 		},
-		resourceId: { type: Types.ObjectId, required: true },
+		resourceId: { type: Schema.ObjectId, required: true },
 		inherited: { type: Boolean, default: false },
 	},
 	{ timestamps: true }

@@ -4,7 +4,8 @@ const usageSchema = new Schema(
 	{
 		credits: Number,
 		actions: [String],
-		userId: Types.ObjectId,
+		userId: Schema.ObjectId,
+		parentId: Schema.ObjectId,
 		scope: {
 			type: {
 				type: String,
@@ -13,7 +14,7 @@ const usageSchema = new Schema(
 				type: String,
 			},
 		},
-		objectId: Types.ObjectId,
+		objectId: Schema.ObjectId,
 	},
 	{ timestamps: true }
 );

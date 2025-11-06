@@ -7,6 +7,7 @@ import { DocumentTagModel } from "../models/documentTag.model.ts";
 import type { IDocument } from "../types/document.ts";
 import { auditActivity } from "../services/auditLogService.ts";
 import { Types } from "mongoose";
+import { AccessControlModel } from "../models/accessControl.model.ts";
 
 export const createDocumentController = async (
 	request: Request,
@@ -14,6 +15,7 @@ export const createDocumentController = async (
 ) => {
 	try {
 		const validateRequest = documentSchema.safeParse(request.body);
+		const user = request.user;
 		if (validateRequest.error) {
 			return response.status(400).json({ error: "Bad request!" });
 		}
@@ -22,10 +24,29 @@ export const createDocumentController = async (
 			folderExist = await FolderModel.findById(
 				validateRequest.data.folderId
 			);
-			if (!folderExist) {
+		}
+
+		if (validateRequest.data.folderId && !folderExist) {
+			return response
+				.status(404)
+				.json({ error: "Folder does not exist!" });
+		}
+		if (user?.role === "user" && !folderExist) {
+			return response.status(403).json({
+				error: "Permission denied!",
+				message:
+					"You are not allowed to create document in root folder",
+			});
+		} else if (user?.role === "user" && folderExist) {
+			const hasPermission = await AccessControlModel.findOne({
+				userId: user.sub,
+				resourceId: folderExist._id,
+			});
+
+			if (!hasPermission) {
 				return response
-					.status(404)
-					.json({ error: "Folder does not exist!" });
+					.status(403)
+					.json({ error: "Permission denied!" });
 			}
 		}
 
@@ -37,7 +58,8 @@ export const createDocumentController = async (
 
 		if (checkFileExistInFolder) {
 			return response.status(409).json({
-				error: `File with ${validateRequest.data.filename} of ${
+				error: "Document already exist!",
+				message: `File with ${validateRequest.data.filename} of ${
 					validateRequest.data.mime
 				} is already exist in ${
 					validateRequest.data.folderId ? "folder" : "root folder"
@@ -60,6 +82,7 @@ export const createDocumentController = async (
 			mime: validateRequest.data.mime,
 			textContent: validateRequest.data.textContent,
 			folderId: validateRequest.data.folderId,
+			ownerId: folderExist?.ownerId,
 		});
 		// create new document in collection
 		await newDocument.save();
@@ -95,6 +118,7 @@ export const createDocumentController = async (
 			entityType: "document",
 			action: ["document created"],
 			metadata: newDocument.metadata,
+			parentId: folderExist!.ownerId,
 		});
 
 		return response.status(201).json({ data: newDocument });
@@ -147,6 +171,8 @@ export const getFoldersController = async (
 				},
 			},
 		]);
+
+		return response.status(200).json({ data: files });
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error" });

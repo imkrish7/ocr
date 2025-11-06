@@ -9,5 +9,5 @@ const mimeType: Record<string, string> = {
 
 export const getMimeType = (filename: string) => {
 	const extension = filename.split(".")[1];
-	return extension ? mimeType[extension] : "uknown";
+	return extension ? mimeType[extension] : "unknown";
 };

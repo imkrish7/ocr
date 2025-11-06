@@ -4,7 +4,11 @@ const folderSchema = new Schema(
 	{
 		name: String,
 		parentId: String,
-		ownerId: Types.ObjectId,
+		createdBy: Schema.ObjectId,
+		ownerId: {
+			type: Schema.ObjectId,
+			required: true,
+		},
 		metadata: Schema.Types.Mixed,
 	},
 	{ timestamps: true }

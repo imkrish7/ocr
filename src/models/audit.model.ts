@@ -2,8 +2,15 @@ import { Schema, Types, model } from "mongoose";
 
 const auditLogSchema = new Schema(
 	{
-		userId: Types.ObjectId,
-		action: String,
+		userId: {
+			type: Types.ObjectId,
+			required: true,
+		},
+		parentId: {
+			type: Types.ObjectId,
+			required: true,
+		},
+		action: [String],
 		entityId: Types.ObjectId,
 		entityType: String,
 		metaData: {

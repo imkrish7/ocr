@@ -53,6 +53,7 @@ export const runActionController = async (
 			entityType: validateData.scope.name,
 			action: [...validateData.actions],
 			metadata: resource.metadata ?? {},
+			parentId: resource.ownerId!,
 		});
 
 		return response.status(200).json({ message: "file has been created!" });
