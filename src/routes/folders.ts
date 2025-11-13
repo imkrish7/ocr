@@ -1,32 +1,22 @@
 import { Router } from "express";
-import {
-	createDocumentController,
-	getDocumentWithFilters,
-	getDocumentWithTagController,
-} from "../contollers/document.controllers.ts";
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
+import { getFoldersController } from "../contollers/folders.controllers.ts";
 
 const routes = Router();
 
-routes.post(
-	"/docs",
-	authMiddleware,
-	roleMiddleware(["admin", "user"]),
-	createDocumentController
-);
-
+routes.post("/create", authMiddleware);
 routes.get(
-	"/folders/{:id}/docs",
+	"/",
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
-	getDocumentWithTagController
+	getFoldersController
 );
 routes.get(
-	"/search",
+	"/primary",
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
-	getDocumentWithFilters
+	getFoldersController
 );
 
-export { routes as documentRoutes };
+export { routes as folderRoutes };

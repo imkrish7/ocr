@@ -1,3 +1,16 @@
+exist;
+db.users.deleteMany({});
+db.users.deleteMany();
+show collections;
+use ocr;
+db.users.find();
+clear;
+clear
+db.users.deleteMany({});
+db.users.delete({})
+db.users.find({});
+show collections;
+use ocr;
 show dbs;
 exit
 show collections;

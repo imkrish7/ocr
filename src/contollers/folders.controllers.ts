@@ -1,0 +1,76 @@
+import { DocumentModel } from "../models/document.model.ts";
+import type { Request, Response } from "express";
+import { FolderModel } from "../models/folder.model.ts";
+
+export const getFoldersController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const user = request.user;
+
+		if (!user) {
+			return response.status(401).json({ error: "Unauthorized" });
+		}
+
+		const folders = await FolderModel.find({
+			ownerId: user.sub,
+		});
+
+		return response.status(200).json({ data: folders });
+	} catch (error) {
+		return response.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const getFoldersWithDocumentController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const user = request.user;
+		// first fetch all primary documentTags now join with document groupby folderid and primaryTag then perform count on it
+		const files = await DocumentModel.aggregate([
+			{
+				$lookup: {
+					from: "documentTags",
+					localField: "_id",
+					foreignField: "documentId",
+					let: { isPrimary: "$isPrimary" },
+					as: "documentListWithTag",
+					pipeline: [
+						{
+							$match: {
+								$expr: { $eq: ["$$isPrimary", true] },
+							},
+						},
+					],
+				},
+			},
+			{ $unwind: "$documentListWithTag" },
+			{
+				$lookup: {
+					from: "folders",
+					localField: "folderId",
+					foreignField: "_id",
+					as: "documentWithFolder",
+				},
+			},
+			{ $unwind: "$documentWithFolder" },
+			{
+				$group: {
+					_id: {
+						folderId: "$documentWithFolder.folderId",
+						folderName: "$documentWithFolder.name",
+					},
+					documentCount: { $sum: 1 },
+				},
+			},
+		]);
+
+		return response.status(200).json({ data: files });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error" });
+	}
+};
