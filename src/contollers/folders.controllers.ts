@@ -1,6 +1,9 @@
 import { DocumentModel } from "../models/document.model.ts";
 import type { Request, Response } from "express";
 import { FolderModel } from "../models/folder.model.ts";
+import { createFolder } from "../schema/folder.ts";
+import { AccessControlModel } from "../models/accessControl.model.ts";
+import { Types } from "mongoose";
 
 export const getFoldersController = async (
 	request: Request,
@@ -72,5 +75,56 @@ export const getFoldersWithDocumentController = async (
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const createFolderController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const user = request.user;
+
+		const validateRequest = createFolder.safeParse(request.body);
+
+		if (validateRequest.error) {
+			return response
+				.status(400)
+				.json({ error: validateRequest.error.message });
+		}
+
+		const accessControl = await AccessControlModel.findOne({
+			resourceId: validateRequest.data.parentId,
+			userId: user?.sub,
+		});
+
+		if (!accessControl) {
+			return response.status(403).json({ error: "Permission denied!" });
+		}
+
+		const isParentExist = await FolderModel.findById(
+			validateRequest.data.parentId
+		);
+
+		if (!isParentExist) {
+			return response
+				.status(404)
+				.json({ error: "Parent folder not found!" });
+		}
+
+		const newFolder = new FolderModel({
+			alias: validateRequest.data.name,
+			parentId: validateRequest.data.parentId,
+			typeOf: "subfolder",
+			name: `Folder-${Date.now()}-${user?.sub}`,
+			createdBy: new Types.ObjectId(user?.sub),
+			ownerId: isParentExist?.ownerId,
+		});
+
+		await newFolder.save();
+		return response.status(201).json({ message: "Folder added!" });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
 	}
 };

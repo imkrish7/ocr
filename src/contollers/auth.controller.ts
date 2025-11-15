@@ -4,6 +4,9 @@ import { UserModel } from "../models/user.model.ts";
 import { signPayload, verifyToken } from "../core/auth.ts";
 import { AccessControlModel } from "../models/accessControl.model.ts";
 import { RefreshModel } from "../models/refreshToken.model.ts";
+import { RoleModel } from "../models/role.model.ts";
+import { FolderModel } from "../models/folder.model.ts";
+import mongoose from "mongoose";
 
 export const loginController = async (request: Request, response: Response) => {
 	try {
@@ -24,7 +27,7 @@ export const loginController = async (request: Request, response: Response) => {
 		}
 
 		const accessControl = await AccessControlModel.findOne({
-			usrId: isUserExist._id,
+			userId: isUserExist._id,
 		});
 
 		const { accessToken, refreshToken } = await signPayload({
@@ -67,6 +70,7 @@ export const signupController = async (
 	request: Request,
 	response: Response
 ) => {
+	// let session = await mongoose.startSession();
 	try {
 		const validateRequest = signupSchema.safeParse(request.body);
 		if (validateRequest.error) {
@@ -81,14 +85,51 @@ export const signupController = async (
 			return response.status(400).json({ error: "User already exist!" });
 		}
 
-		const newUser = new UserModel({
+		// await session.startTransaction();
+
+		let newUser = new UserModel({
 			name: validateRequest.data.name,
 			email: validateRequest.data.email,
 			password: validateRequest.data.password,
-			role: "admin",
+		});
+
+		let rootFolder = new FolderModel({
+			name: `folder-${Date.now()}-${newUser._id.toString()}`,
+			typeOf: "root",
+			alias: "root",
+			ownerId: newUser._id,
+			createdBy: newUser._id,
+			metadata: {
+				description: "Its a root folder",
+			},
+		});
+
+		let checkAdminRoleExist = await RoleModel.findOne({ name: "admin" });
+		if (!checkAdminRoleExist) {
+			checkAdminRoleExist = new RoleModel({
+				name: "admin",
+				permissions: [
+					{
+						resource: "folder",
+						actions: ["read", "write", "delete", "update"],
+					},
+				],
+			});
+		}
+
+		const newAccessControl = new AccessControlModel({
+			userId: newUser._id,
+			resourceId: rootFolder._id,
+			resourceType: "folder",
+			roleId: checkAdminRoleExist._id,
 		});
 
 		await newUser.save();
+		await rootFolder.save();
+		await checkAdminRoleExist.save();
+		await newAccessControl.save();
+		// await session.commitTransaction();
+		// await session.endSession();
 		return response.status(200).json({ details: "User created" });
 	} catch (error) {
 		console.error(error);

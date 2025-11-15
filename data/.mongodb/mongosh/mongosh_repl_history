@@ -1,3 +1,49 @@
+exit
+db.folders.deleteOne({typeOf: "subfolder"});
+db.folders.find({})
+db.refreshtokens.deleteMany({});
+db.accesscontrols.deleteMany({});
+db.users.deleteMany({});
+db.folders.deleteMany({});
+db.folders.find({});
+use ocr;
+db.users.deleteMany({});
+db.accesscontrols.deleteMany({});
+db.folders.deleteMany({});
+db.refreshtokens.deleteMany({});
+db.refreshTokens.deleteMany({});
+db.folders.deleteMany({});
+db.accesscontrols.deleteMany({});
+db.accessControls.deleteMany({});
+db.roles.deleteMany({});
+db.users.deleteMany({});
+db.roles.find({});
+db.users.deleteMany({});
+db.roles.deleteMany({});
+db.folders.deleteMany({});
+db.refreshTokens.deleteMany({})
+db.refreshTokens.deleteMany({});
+db.refreshTokens.deleteMany({})
+show collections;
+db.refreshToken.deleteMany({});
+db.refreshToken.deleteMany({})
+db.folders.deleteMany({});
+db.roles.deleteMany({});
+db.users.deleteMany({});
+ls
+use ocr;
+db.roles.deleteMany({});
+db.users.deleteMany({});
+db.folders.deleteMany({});
+db.users.deleteMany({});
+db.roles.deleteMany({});
+db.users.deleteMany({});
+db.users.find({});
+db.refreshtokens.deleteMany({});
+show collections;
+db.users.deleteMany({});
+db.user.deleteMany({})
+use ocr;
 exist;
 db.users.deleteMany({});
 db.users.deleteMany();

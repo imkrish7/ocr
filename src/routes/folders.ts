@@ -1,11 +1,19 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
-import { getFoldersController } from "../contollers/folders.controllers.ts";
+import {
+	createFolderController,
+	getFoldersController,
+} from "../contollers/folders.controllers.ts";
 
 const routes = Router();
 
-routes.post("/create", authMiddleware);
+routes.post(
+	"/create",
+	authMiddleware,
+	roleMiddleware(["admin", "user"]),
+	createFolderController
+);
 routes.get(
 	"/",
 	authMiddleware,

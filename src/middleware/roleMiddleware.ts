@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { RoleModel } from "../models/role.model.ts";
+import { Types } from "mongoose";
 
 export const roleMiddleware = (
 	requiredRoles: string[] = [],
@@ -11,9 +12,9 @@ export const roleMiddleware = (
 			if (!user) {
 				return response.status(401).json({ error: "Unauthorized" });
 			}
-
-			const userRole = await RoleModel.findById(user.role);
-
+			const userRole = await RoleModel.findOne({
+				_id: new Types.ObjectId(user.role),
+			});
 			if (!userRole) {
 				return response
 					.status(403)

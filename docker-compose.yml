@@ -2,7 +2,7 @@ services:
     mongo:
         image: mongodb/mongodb-community-server:6.0-ubi8
         restart: always
-        container_name: ocr-mongo
+        container_name: ocr-mong
         environment:
             MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: root123
@@ -12,3 +12,4 @@ services:
             - type: bind
               source: ./data
               target: /data/db
+            - ./keyfile:/etc/mongo-keyfile/keyfile

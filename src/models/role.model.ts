@@ -6,7 +6,6 @@ const roleSchema = new Schema(
 			type: String,
 			enum: ["admin", "moderator", "support", "user"],
 			required: true,
-			unique: true,
 		},
 		description: String,
 		permissions: [
@@ -18,8 +17,9 @@ const roleSchema = new Schema(
 				},
 				actions: [
 					{
-						type: String,
+						type: [String],
 						enum: ["read", "write", "delete", "update"],
+						required: true,
 					},
 				],
 			},
