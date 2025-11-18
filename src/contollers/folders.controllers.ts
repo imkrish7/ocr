@@ -5,6 +5,45 @@ import { createFolder } from "../schema/folder.ts";
 import { AccessControlModel } from "../models/accessControl.model.ts";
 import { Types } from "mongoose";
 
+export const getFolderContentController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const user = request.user;
+
+		if (!user) {
+			return response.status(401).json({ error: "Unauthorized" });
+		}
+
+		const rootFolder = await FolderModel.findOne({
+			ownerId: user.sub,
+			parentId: null,
+			typeOf: "root",
+		});
+
+		if (!rootFolder) {
+			return response
+				.status(404)
+				.json({ error: "Root folder does not exist!" });
+		}
+
+		const folders = await FolderModel.find({
+			parentId: rootFolder._id,
+		});
+
+		const rootFolderDocs = await DocumentModel.find({
+			folderId: rootFolder._id,
+		});
+
+		return response
+			.status(200)
+			.json({ data: { documents: rootFolderDocs, folders } });
+	} catch (error) {
+		return response.status(500).json({ error: "Internal server error" });
+	}
+};
+
 export const getFoldersController = async (
 	request: Request,
 	response: Response

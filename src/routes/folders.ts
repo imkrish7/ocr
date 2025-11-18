@@ -3,6 +3,7 @@ import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
 import {
 	createFolderController,
+	getFolderContentController,
 	getFoldersController,
 } from "../contollers/folders.controllers.ts";
 
@@ -27,4 +28,10 @@ routes.get(
 	getFoldersController
 );
 
+routes.get(
+	"/:folderId",
+	authMiddleware,
+	roleMiddleware(["admin"]),
+	getFolderContentController
+);
 export { routes as folderRoutes };
