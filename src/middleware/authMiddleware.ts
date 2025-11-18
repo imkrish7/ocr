@@ -28,8 +28,6 @@ export const authMiddleware = async (
 			token: refreshToken,
 		});
 
-		console.log(isRefreshTokenExist);
-
 		if (!isRefreshTokenExist) {
 			return response.status(401).json({ error: "Unauthorized" });
 		}

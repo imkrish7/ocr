@@ -5,9 +5,14 @@ import {
 	createFolderController,
 	getFolderContentController,
 	getFoldersController,
+	getRootFolderController,
 } from "../contollers/folders.controllers.ts";
 
-const routes = Router();
+const routes = Router({
+	caseSensitive: true,
+	strict: true,
+	mergeParams: true,
+});
 
 routes.post(
 	"/create",
@@ -26,6 +31,13 @@ routes.get(
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
 	getFoldersController
+);
+
+routes.get(
+	"/root",
+	authMiddleware,
+	roleMiddleware(["admin"]),
+	getRootFolderController
 );
 
 routes.get(

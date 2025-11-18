@@ -44,6 +44,37 @@ export const getFolderContentController = async (
 	}
 };
 
+export const getRootFolderController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const user = request.user;
+
+		if (!user) {
+			return response.status(401).json({ error: "Unauthorized" });
+		}
+
+		const rootFolder = await FolderModel.findOne({
+			ownerId: user.sub,
+			parentId: null,
+			typeOf: "root",
+		});
+
+		if (!rootFolder) {
+			return response
+				.status(404)
+				.json({ error: "Root folder does not exist!" });
+		}
+
+		return response
+			.status(200)
+			.json({ data: { root: rootFolder._id.toString() } });
+	} catch (error) {
+		return response.status(500).json({ error: "Internal server error" });
+	}
+};
+
 export const getFoldersController = async (
 	request: Request,
 	response: Response

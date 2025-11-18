@@ -6,7 +6,6 @@ import { AccessControlModel } from "../models/accessControl.model.ts";
 import { RefreshModel } from "../models/refreshToken.model.ts";
 import { RoleModel } from "../models/role.model.ts";
 import { FolderModel } from "../models/folder.model.ts";
-import mongoose from "mongoose";
 
 export const loginController = async (request: Request, response: Response) => {
 	try {
@@ -197,6 +196,44 @@ export const refreshTokenController = async (
 				sameSite: "lax",
 			})
 			.json({ accessToken });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const logoutController = async (
+	request: Request,
+	response: Response
+) => {
+	const refreshToken = request.cookies.refreshToken;
+
+	if (!refreshToken) {
+		return response.status(401).json({ error: "Unauthorized" });
+	}
+
+	try {
+		const refreshPayload = await verifyToken(refreshToken);
+
+		const isRefreshTokenExist = await RefreshModel.findOne({
+			userId: refreshPayload.sub,
+			token: refreshToken,
+		});
+
+		if (!isRefreshTokenExist) {
+			return response.status(401).json({ error: "Unauthorized" });
+		}
+
+		if (isRefreshTokenExist.revoked) {
+			return response.status(401).json({ error: "Unauthorized" });
+		}
+
+		await RefreshModel.findByIdAndUpdate(isRefreshTokenExist._id, {
+			revoked: true,
+			lastUsedAt: Date.now(),
+		});
+
+		return response.status(200).json({ message: "User loggedout" });
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error" });
