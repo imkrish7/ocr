@@ -6,10 +6,29 @@ const documentSchema = new Schema(
 		createdBy: Schema.ObjectId,
 		filename: String,
 		mime: String,
-		textContent: String,
+		textContent: {
+			type: String,
+			required: false,
+			default: null,
+		},
 		folderId: {
 			type: Schema.ObjectId,
 			default: null,
+		},
+		sourceFile: {
+			status: {
+				type: String,
+				enum: ["PENDING", "UPLOADED", "FAILED"],
+				default: "PENDING",
+			},
+			url: {
+				type: String,
+				required: false,
+			},
+			path: {
+				type: String,
+				required: true,
+			},
 		},
 		metadata: Schema.Types.Mixed,
 	},

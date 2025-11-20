@@ -6,3 +6,7 @@ export interface IDocument {
 	mime: string;
 	textContent: string;
 }
+
+export interface IPresignedURL {
+	filename: string;
+}

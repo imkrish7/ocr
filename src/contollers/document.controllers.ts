@@ -1,5 +1,9 @@
 import type { Request, Response } from "express";
-import { documentSchema } from "../schema/document.ts";
+import {
+	documentSchema,
+	presignedURLSchema,
+	uploadStatusUpdateSchema,
+} from "../schema/document.ts";
 import { DocumentModel } from "../models/document.model.ts";
 import { FolderModel } from "../models/folder.model.ts";
 import { TagModel } from "../models/tag.model.ts";
@@ -8,6 +12,8 @@ import type { IDocument } from "../types/document.ts";
 import { auditActivity } from "../services/auditLogService.ts";
 import { Types } from "mongoose";
 import { AccessControlModel } from "../models/accessControl.model.ts";
+import { uuidv4 } from "zod/mini";
+import { getPresignedURL } from "../services/minioService.ts";
 
 export const createDocumentController = async (
 	request: Request,
@@ -239,6 +245,90 @@ export const getDocumentWithFilters = async (
 		}
 
 		return response.status(200).json({ data: documents });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
+	}
+};
+
+export const getPresignedURLDocumentController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const { folderId } = request.params;
+
+		if (!folderId) {
+			return response
+				.status(400)
+				.json({ error: "Provide a valid folder" });
+		}
+
+		const folderExist = await FolderModel.findById(folderId);
+
+		if (!folderExist) {
+			return response
+				.status(404)
+				.json({ error: "Folder does not exist" });
+		}
+		const validateRequest = presignedURLSchema.safeParse(request.body);
+		if (validateRequest.error) {
+			return response.status(400).json({ error: "Bad request" });
+		}
+		const objectid = uuidv4();
+		const filename = `${folderExist._id.toString()}/${objectid}`;
+		const presignedURL = await getPresignedURL(filename);
+
+		const newdoc = await new DocumentModel({
+			filename: validateRequest.data.filename,
+			mime: validateRequest.data.mime,
+			folderId: folderExist._id.toString(),
+			sourceFile: {
+				url: presignedURL,
+				status: "PENDING",
+				path: filename,
+			},
+		});
+		await newdoc.save();
+		return response.status(200).json({
+			data: {
+				presignedURL,
+				docid: newdoc._id.toString(),
+			},
+		});
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
+	}
+};
+
+export const updateDocumentUploadController = async (
+	request: Request,
+	response: Response
+) => {
+	try {
+		const validateRequest = uploadStatusUpdateSchema.safeParse(
+			request.body
+		);
+
+		if (validateRequest.error) {
+			return response.status(400).json({ error: "Bad request" });
+		}
+
+		if (validateRequest.data.status === "FAILED") {
+			// deletedoc
+			await DocumentModel.findByIdAndDelete(validateRequest.data.docid);
+			return response.status(200).json({ message: "Failed to upload" });
+		} else {
+			// update upload status
+			await DocumentModel.findByIdAndUpdate(validateRequest.data.docid, {
+				sourceFile: {
+					status: "UPLOADED",
+				},
+			});
+
+			return response.status(200).json({ message: "File uploaded!" });
+		}
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error!" });
