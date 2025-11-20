@@ -13,3 +13,20 @@ services:
               source: ./data
               target: /data/db
             - ./keyfile:/etc/mongo-keyfile/keyfile
+
+    minio:
+        image: quay.io/minio/minio:latest
+        restart: always
+        container_name: minio_admin
+        environment:
+            - MINIO_ROOT_USER=admin
+            - MINIO_ROOT_PASSWORD=admin123
+        command: server /data --console-address ":9001"
+        ports:
+            - "9000:9000"
+            - "9001:9001"
+        volumes:
+            - minio_data:/data
+
+volumes:
+    minio_data:
