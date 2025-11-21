@@ -9,7 +9,9 @@ import {
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
 
-const routes = Router();
+const routes = Router({
+	caseSensitive: true,
+});
 
 routes.post(
 	"/docs",

@@ -7,6 +7,7 @@ export const getPresignedURL = async (
 ) => {
 	try {
 		const bucketName = process.env.MINIO_BUCKET_NAME;
+		console.log(bucketName, "BUCKET NAME");
 		if (!bucketName) {
 			throw new Error("Bucket name is required!");
 		}
