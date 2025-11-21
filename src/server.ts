@@ -12,6 +12,7 @@ import { webhookRoutes } from "./routes/webhooks.ts";
 import { documentRoutes } from "./routes/document.ts";
 import { userRoutes } from "./routes/user.ts";
 import { folderRoutes } from "./routes/folders.ts";
+import { sharedRoutes } from "./routes/shared.ts";
 
 async function main() {
 	// requirements
@@ -41,6 +42,7 @@ async function main() {
 		});
 
 		app.use("/v1", documentRoutes);
+		app.use("/v1/shared", sharedRoutes);
 		app.use("/v1", metricsRoutes);
 		app.use("/v1/auth", authRoutes);
 		app.use("/v1/user", userRoutes);
