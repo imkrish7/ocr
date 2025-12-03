@@ -21,6 +21,8 @@
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
+		"@langchain/core": "^1.1.2",
+		"@langchain/ollama": "^1.0.3",
 		"bullmq": "^5.65.0",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",

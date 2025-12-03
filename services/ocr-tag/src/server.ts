@@ -14,6 +14,8 @@ import { userRoutes } from "./routes/user.ts";
 import { folderRoutes } from "./routes/folders.ts";
 import { sharedRoutes } from "./routes/shared.ts";
 import { recentRoutes } from "./routes/recent.ts";
+import { collectionIndex } from "./utils/collectionIndex.ts";
+import { checkIndexExist, createIndex } from "./services/createIndexService.ts";
 
 async function main() {
 	// requirements
@@ -34,6 +36,14 @@ async function main() {
 	try {
 		if (!mongouri) throw new Error("Missing database URI");
 		await mongoose.connect(mongouri);
+		// check collection indexs
+		collectionIndex.forEach(async (entity) => {
+			const { collection, name, fields, type } = entity;
+			const isIndexExist = await checkIndexExist(collection, name);
+			if (!isIndexExist) {
+				await createIndex(collection, name, type, fields);
+			}
+		});
 		mongoose.connection.on("connected", () => {
 			console.log("Database connected!");
 		});

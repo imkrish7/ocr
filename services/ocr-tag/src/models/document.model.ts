@@ -1,6 +1,6 @@
 import { Schema, Types, model } from "mongoose";
 
-const documentSchema = new Schema(
+export const documentSchema = new Schema(
 	{
 		ownerId: Schema.ObjectId,
 		createdBy: Schema.ObjectId,
@@ -33,7 +33,7 @@ const documentSchema = new Schema(
 		favorite: Boolean,
 		metadata: Schema.Types.Mixed,
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 const DocumentModel = model("Document", documentSchema);

@@ -1,39 +1,40 @@
 services:
-    mongo:
-        image: mongodb/mongodb-community-server:6.0-ubi8
-        restart: always
-        container_name: ocr-mong
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: root123
-        ports:
-            - 27018:27017
-        volumes:
-            - type: bind
-              source: ./data
-              target: /data/db
-            - ./keyfile:/etc/mongo-keyfile/keyfile
+  mongo:
+    image: mongodb/mongodb-atlas-local:latest
+    restart: always
+    container_name: ocr-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root123
+      MONGODB_INITDB_DATABASE: ocr
+    ports:
+      - 27018:27017
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+      - ./keyfile:/etc/mongo-keyfile/keyfile
 
-    minio:
-        image: quay.io/minio/minio
-        restart: always
-        container_name: minio_admin
-        environment:
-            - MINIO_ROOT_USER=admin
-            - MINIO_ROOT_PASSWORD=admin123
-        command: server /data --console-address ":9001"
-        ports:
-            - "9000:9000"
-            - "9001:9001"
-        volumes:
-            - minio_data:/data
+  minio:
+    image: quay.io/minio/minio
+    restart: always
+    container_name: minio_admin
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin123
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
 
-    redis:
-        image: redis:latest
-        restart: always
-        container_name: redis_admin
-        ports:
-            - "6379:6379"
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis_admin
+    ports:
+      - "6379:6379"
 
 volumes:
-    minio_data:
+  minio_data:
