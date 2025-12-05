@@ -1,6 +1,6 @@
 import { Schema, Types, model } from "mongoose";
 
-const documentSchema = new Schema(
+export const documentSchema = new Schema(
   {
     ownerId: Schema.ObjectId,
     createdBy: Schema.ObjectId,
@@ -32,14 +32,28 @@ const documentSchema = new Schema(
     },
     favorite: Boolean,
     metadata: Schema.Types.Mixed,
-    summary: {
-      content: String,
-      embedding: [Number],
-    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
+documentSchema.searchIndex({
+  name: "documentsVectorIndex",
+  type: "vectorSearch",
+  definition: [
+    {
+      type: "vector",
+      path: "summary.embedding",
+      dimensions: 768,
+      similarity: "dotProduct",
+      quantization: "scalar",
+    },
+  ],
+});
+
 const DocumentModel = model("Document", documentSchema);
+
+await DocumentModel.createSearchIndexes();
 
 export { DocumentModel };

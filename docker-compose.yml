@@ -1,19 +1,32 @@
 services:
   mongo:
     image: mongodb/mongodb-atlas-local:latest
-    restart: always
     container_name: ocr-mongo
+    hostname: mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root123
+      MONGODB_INITDB_ROOT_USERNAME: root
+      MONGODB_INITDB_ROOT_PASSWORD: root123
       MONGODB_INITDB_DATABASE: ocr
     ports:
-      - 27018:27017
+      - 27017:27017
     volumes:
-      - type: bind
-        source: ./data
-        target: /data/db
-      - ./keyfile:/etc/mongo-keyfile/keyfile
+      - data:/data/db
+      - config:/data/configdb
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "mongodb://admin:admin123@localhost:27017/?authSource=admin",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
 
   minio:
     image: quay.io/minio/minio
@@ -38,3 +51,5 @@ services:
 
 volumes:
   minio_data:
+  data:
+  config:

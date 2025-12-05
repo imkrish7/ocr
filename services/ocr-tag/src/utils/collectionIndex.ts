@@ -8,31 +8,9 @@ export const collectionIndex = [
 	{
 		collection: DocumentModel,
 		Schema: documentSchema,
-		name: "documents",
-		type: "vectorSearch",
-		fields: [
-			{
-				type: "vector",
-				path: "summary.embedding",
-				dimensions: 768,
-				similarity: "dotProduct",
-				quantization: "scalar",
-			},
-		],
 	},
 	{
 		collection: DocumentEmbeddingModel,
 		Schema: documentEmbeddingSchema,
-		name: "documentembeddings",
-		type: "vectorSearch",
-		fields: [
-			{
-				type: "vector",
-				path: "embedding",
-				dimensions: 768,
-				similarity: "dotProduct",
-				quantization: "scalar",
-			},
-		],
 	},
 ];

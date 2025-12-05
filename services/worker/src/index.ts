@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import { documentWorker } from "./workers/documentWorker.ts";
 

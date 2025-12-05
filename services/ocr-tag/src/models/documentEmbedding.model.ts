@@ -18,7 +18,29 @@ export const documentEmbeddingSchema = new Schema(
 	{ timestamps: true },
 );
 
-export const DocumentEmbeddingModel = model(
+documentEmbeddingSchema.searchIndex({
+	name: "documentEmbeddingsIndex",
+	type: "vectorSearch",
+	definition: {
+		fields: [
+			{
+				type: "vector",
+				path: "embedding",
+				numDimensions: 768,
+				similarity: "dotProduct",
+				quantization: "scalar",
+			},
+		],
+	},
+});
+
+const DocumentEmbeddingModel = model(
 	"DocumentEmbedding",
 	documentEmbeddingSchema,
 );
+
+DocumentEmbeddingModel.createSearchIndexes().then(() => {
+	console.log("Document embedding search index created");
+});
+
+export { DocumentEmbeddingModel };

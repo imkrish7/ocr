@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const documentEmbeddingSchema = new Schema(
+export const documentEmbeddingSchema = new Schema(
   {
     userId: Schema.ObjectId,
     documentId: Schema.ObjectId,
@@ -18,7 +18,25 @@ const documentEmbeddingSchema = new Schema(
   { timestamps: true },
 );
 
-export const DocumentEmbeddingModel = model(
+documentEmbeddingSchema.searchIndex({
+  name: "documentEmbeddingsIndex",
+  type: "vectorSearch",
+  definition: [
+    {
+      type: "vector",
+      path: "embedding",
+      dimensions: 768,
+      similarity: "dotProduct",
+      quantization: "scalar",
+    },
+  ],
+});
+
+const DocumentEmbeddingModel = model(
   "DocumentEmbedding",
   documentEmbeddingSchema,
 );
+
+await DocumentEmbeddingModel.createSearchIndexes();
+
+export { DocumentEmbeddingModel };

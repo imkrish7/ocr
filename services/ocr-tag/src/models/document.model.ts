@@ -1,3 +1,4 @@
+import { NumberedListOutputParser } from "@langchain/core/output_parsers";
 import { Schema, Types, model } from "mongoose";
 
 export const documentSchema = new Schema(
@@ -33,9 +34,31 @@ export const documentSchema = new Schema(
 		favorite: Boolean,
 		metadata: Schema.Types.Mixed,
 	},
-	{ timestamps: true },
+	{
+		timestamps: true,
+	},
 );
 
+documentSchema.searchIndex({
+	name: "documentsVectorIndex",
+	type: "vectorSearch",
+	definition: {
+		fields: [
+			{
+				type: "vector",
+				path: "summary.embedding",
+				numDimensions: 768,
+				similarity: "dotProduct",
+				quantization: "scalar",
+			},
+		],
+	},
+});
+
 const DocumentModel = model("Document", documentSchema);
+
+DocumentModel.createSearchIndexes().then(() => {
+	console.log("Document search index created");
+});
 
 export { DocumentModel };

@@ -1,3 +1,0 @@
-db.auditlogs.find({});
-show collections;
-use ocr;
