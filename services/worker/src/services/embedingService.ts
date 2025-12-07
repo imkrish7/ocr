@@ -30,17 +30,14 @@ const embedContent = async (content: string) => {
   }
 };
 
-export const RFPProcessing = async (data: {
+export const DocumentProcessing = async (data: {
   docid: string;
   userId: string;
   folderId: string;
 }) => {
   try {
-    const attachments = await DocumentModel.findOne({
-      _id: data.docid,
-      userId: data.userId,
-      parentId: data.folderId,
-    });
+    const attachments = await DocumentModel.findById(data.docid);
+
     if (attachments) {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = path.dirname(__filename);
@@ -69,12 +66,14 @@ export const RFPProcessing = async (data: {
             documentId: data.docid,
             embedding: embedding[0],
             userId: data.userId,
-            content: doc.pageContent,
+            pageContent: doc.pageContent,
           });
           await newDocumentEmbedding.save();
         }
         const result = await summarizeDocument(data.docid);
+
         const embedding = await embedContent(result);
+
         await DocumentModel.findByIdAndUpdate(data.docid, {
           summary: {
             content: result,

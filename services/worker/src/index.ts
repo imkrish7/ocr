@@ -15,7 +15,7 @@ async function main() {
       console.error(error);
     });
 
-    await documentWorker.run();
+    // await documentWorker.run();
   } catch (error) {
     throw error;
   }

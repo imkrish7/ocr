@@ -64,17 +64,19 @@ const chatWorkflow = new StateGraph(graphState)
 	.addEdge("summarizeContext", "__end__")
 	.compile();
 
-const chat = async (docid: string, query: string) => {
-	const events = chatWorkflow.streamEvents(
-		{
-			docid,
-			query,
-			context: [],
-			messages: [],
-		},
-		{
-			version: "v2",
-			streamMode: "messages",
-		},
-	);
-};
+export { chatWorkflow };
+
+// const chat = async (docid: string, query: string) => {
+// 	const events = chatWorkflow.streamEvents(
+// 		{
+// 			docid,
+// 			query,
+// 			context: [],
+// 			messages: [],
+// 		},
+// 		{
+// 			version: "v2",
+// 			streamMode: "messages",
+// 		},
+// 	);
+// };

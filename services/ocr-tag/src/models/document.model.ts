@@ -33,6 +33,10 @@ export const documentSchema = new Schema(
 		},
 		favorite: Boolean,
 		metadata: Schema.Types.Mixed,
+		summary: {
+			content: String,
+			embedding: [Number],
+		},
 	},
 	{
 		timestamps: true,

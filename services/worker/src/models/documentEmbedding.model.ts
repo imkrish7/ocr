@@ -18,25 +18,25 @@ export const documentEmbeddingSchema = new Schema(
   { timestamps: true },
 );
 
-documentEmbeddingSchema.searchIndex({
-  name: "documentEmbeddingsIndex",
-  type: "vectorSearch",
-  definition: [
-    {
-      type: "vector",
-      path: "embedding",
-      dimensions: 768,
-      similarity: "dotProduct",
-      quantization: "scalar",
-    },
-  ],
-});
+// documentEmbeddingSchema.searchIndex({
+//   name: "documentEmbeddingsIndex",
+//   type: "vectorSearch",
+//   definition: [
+//     {
+//       type: "vector",
+//       path: "embedding",
+//       dimensions: 768,
+//       similarity: "dotProduct",
+//       quantization: "scalar",
+//     },
+//   ],
+// });
 
 const DocumentEmbeddingModel = model(
   "DocumentEmbedding",
   documentEmbeddingSchema,
 );
 
-await DocumentEmbeddingModel.createSearchIndexes();
+// await DocumentEmbeddingModel.createSearchIndexes();
 
 export { DocumentEmbeddingModel };

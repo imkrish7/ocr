@@ -18,3 +18,7 @@ export const uploadStatusUpdateSchema = z.object({
 	docid: z.string(),
 	status: z.enum(["UPLOADED", "FAILED"]),
 });
+
+export const chatDocumentSchema = z.object({
+	query: z.string().min(2),
+});

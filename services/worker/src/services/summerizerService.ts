@@ -2,9 +2,10 @@ import { z } from "zod";
 import { StateGraph } from "@langchain/langgraph";
 import { DocumentEmbeddingModel } from "../models/documentEmbedding.model.ts";
 import { ChatOllama } from "@langchain/ollama";
+import { Types } from "mongoose";
 
 const llm = new ChatOllama({
-  model: "llama2",
+  model: "llama3.2",
 });
 
 const SummaryState = z.object({
@@ -16,7 +17,7 @@ const SummaryState = z.object({
 
 export const retriever = async (state: z.infer<typeof SummaryState>) => {
   const documents = await DocumentEmbeddingModel.find({
-    documentId: state.docid,
+    documentId: new Types.ObjectId(state.docid),
   });
 
   const chunks = documents.map((doc) => doc.pageContent);
@@ -29,12 +30,11 @@ export const retriever = async (state: z.infer<typeof SummaryState>) => {
 
 const chunkSummerizer = async (state: z.infer<typeof SummaryState>) => {
   const chunkSummeries = [];
-
-  for (const chunk in state.chunkTexts) {
+  for (const chunk of state.chunkTexts) {
     const summary = await llm.invoke(
       `summarize this text in 4-5 bullet points:\n\n ${chunk}`,
     );
-    chunkSummeries.push(summary);
+    chunkSummeries.push(summary.content);
   }
 
   return {
@@ -43,7 +43,7 @@ const chunkSummerizer = async (state: z.infer<typeof SummaryState>) => {
   };
 };
 
-const finalSummary = async (state: z.infer<typeof SummaryState>) => {
+const summary = async (state: z.infer<typeof SummaryState>) => {
   const chunkSummaries = state.chunkSummeries.join("\n\n");
 
   const finalSummary = await llm.invoke(
@@ -52,18 +52,18 @@ const finalSummary = async (state: z.infer<typeof SummaryState>) => {
 
   return {
     ...state,
-    finalSummary,
+    finalSummary: finalSummary.content,
   };
 };
 
 const summerizerWorkflow = new StateGraph(SummaryState)
   .addNode("retriever", retriever)
   .addNode("chunkSummaries", chunkSummerizer)
-  .addNode("finalSummary", finalSummary)
+  .addNode("summary", summary)
   .addEdge("__start__", "retriever")
   .addEdge("retriever", "chunkSummaries")
-  .addEdge("chunkSummaries", "finalSummary")
-  .addEdge("finalSummary", "__end__")
+  .addEdge("chunkSummaries", "summary")
+  .addEdge("summary", "__end__")
   .compile();
 
 export const summarizeDocument = async (docid: string) => {

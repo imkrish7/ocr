@@ -1,11 +1,13 @@
 import { Worker } from "bullmq";
+import { DocumentProcessing } from "../services/embedingService.ts";
 
 export const documentWorker = new Worker(
   "document",
   async (job) => {
-    switch (job.data.type) {
+    console.dir(job.data, job.name);
+    switch (job.name) {
       case "DOCUMENT_UPLOADED":
-        // await createDocument(job.data);
+        await DocumentProcessing(job.data);
         break;
       case "uploaded":
         // await updateDocument(job.data);

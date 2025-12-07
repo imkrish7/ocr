@@ -5,6 +5,7 @@ import {
 	getDocumentWithTagController,
 	getPresignedURLDocumentController,
 	updateDocumentUploadController,
+	getDocumentViewController,
 } from "../contollers/document.controllers.ts";
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
@@ -17,33 +18,40 @@ routes.post(
 	"/docs",
 	authMiddleware,
 	roleMiddleware(["admin", "user"]),
-	createDocumentController
+	createDocumentController,
 );
 
 routes.get(
 	"/folders/{:id}/docs",
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
-	getDocumentWithTagController
+	getDocumentWithTagController,
 );
 routes.get(
 	"/search",
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
-	getDocumentWithFilters
+	getDocumentWithFilters,
 );
 
 routes.post(
 	"/{:folderId}/upload",
 	authMiddleware,
 	roleMiddleware(["admin", "user"]),
-	getPresignedURLDocumentController
+	getPresignedURLDocumentController,
 );
 routes.post(
 	"/{:folderId}/upload/update",
 	authMiddleware,
 	roleMiddleware(["admin", "user"]),
-	updateDocumentUploadController
+	updateDocumentUploadController,
+);
+
+routes.get(
+	"/{:docid}/view",
+	authMiddleware,
+	roleMiddleware(["admin", "user", "moderator", "support"]),
+	getDocumentViewController,
 );
 
 export { routes as documentRoutes };

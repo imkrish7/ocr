@@ -32,28 +32,32 @@ export const documentSchema = new Schema(
     },
     favorite: Boolean,
     metadata: Schema.Types.Mixed,
+    summary: {
+      content: String,
+      embedding: [Number],
+    },
   },
   {
     timestamps: true,
   },
 );
 
-documentSchema.searchIndex({
-  name: "documentsVectorIndex",
-  type: "vectorSearch",
-  definition: [
-    {
-      type: "vector",
-      path: "summary.embedding",
-      dimensions: 768,
-      similarity: "dotProduct",
-      quantization: "scalar",
-    },
-  ],
-});
+// documentSchema.searchIndex({
+//   name: "documentsVectorIndex",
+//   type: "vectorSearch",
+//   definition: [
+//     {
+//       type: "vector",
+//       path: "summary.embedding",
+//       dimensions: 768,
+//       similarity: "dotProduct",
+//       quantization: "scalar",
+//     },
+//   ],
+// });
 
 const DocumentModel = model("Document", documentSchema);
 
-await DocumentModel.createSearchIndexes();
+// await DocumentModel.createSearchIndexes();
 
 export { DocumentModel };

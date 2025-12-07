@@ -3,6 +3,7 @@ import {
 	documentSchema,
 	presignedURLSchema,
 	uploadStatusUpdateSchema,
+	chatDocumentSchema,
 } from "../schema/document.ts";
 import { DocumentModel } from "../models/document.model.ts";
 import { FolderModel } from "../models/folder.model.ts";
@@ -12,10 +13,14 @@ import type { IDocument } from "../types/document.ts";
 import { auditActivity } from "../services/auditLogService.ts";
 import { Types } from "mongoose";
 import { AccessControlModel } from "../models/accessControl.model.ts";
-import { getPresignedURL } from "../services/minioService.ts";
+import {
+	getDocumentViewURL,
+	getPresignedURL,
+} from "../services/minioService.ts";
 import { AuditLogModel } from "../models/audit.model.ts";
 import { v4 as uuidv4 } from "uuid";
 import { workerQueue } from "../core/workerQueue.ts";
+import { chatWorkflow } from "../services/chatService.ts";
 
 export const createDocumentController = async (
 	request: Request,
@@ -353,8 +358,8 @@ export const updateDocumentUploadController = async (
 				parentId: docExist.folderId,
 			});
 			workerQueue.add("DOCUMENT_UPLOADED", {
-				docId: validateRequest.data.docid,
-				user: user?.sub,
+				docid: validateRequest.data.docid,
+				userId: user?.sub,
 				folderId: docExist.folderId,
 			});
 			return response.status(200).json({ message: "File uploaded!" });
@@ -362,5 +367,76 @@ export const updateDocumentUploadController = async (
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error!" });
+	}
+};
+
+export const getDocumentViewController = async (
+	request: Request,
+	response: Response,
+) => {
+	try {
+		const user = request.user;
+		const { docid } = request.params;
+
+		if (!docid) {
+			return response.status(400).json({ error: "Bad request" });
+		}
+
+		const document = await DocumentModel.findById(docid);
+
+		if (!document) {
+			return response.status(404).json({ error: "Document not found" });
+		}
+
+		const documentViewURL = await getDocumentViewURL(
+			document.sourceFile?.path!,
+		);
+
+		return response.status(200).json({ data: documentViewURL });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
+	}
+};
+
+export const chatToDocuments = async (request: Request, response: Response) => {
+	try {
+		const user = request.user;
+		const { docid } = request.params;
+		const validateRequest = chatDocumentSchema.safeParse(request.body);
+
+		if (validateRequest.error) {
+			return response.status(400).json({ error: "Bad request" });
+		}
+
+		const docExist = await DocumentModel.findById(docid);
+
+		if (!docExist) {
+			return response
+				.status(404)
+				.json({ error: "Document does not exist!" });
+		}
+
+		response.setHeader("Content-Type", "text/event-stream");
+		response.setHeader("Cache-Control", "no-cache");
+		response.setHeader("Connection", "keep-alive");
+
+		const events = chatWorkflow.streamEvents(
+			{
+				docid: docExist._id.toString(),
+				query: validateRequest.data.query,
+				context: [],
+				messages: [],
+			},
+			{
+				version: "v2",
+				streamMode: "messages",
+			},
+		);
+
+		return response.status(200).json({ message: "Chat response" });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error" });
 	}
 };
