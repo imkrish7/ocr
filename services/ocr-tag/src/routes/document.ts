@@ -6,6 +6,7 @@ import {
 	getPresignedURLDocumentController,
 	updateDocumentUploadController,
 	getDocumentViewController,
+	chatToDocumentController,
 } from "../contollers/document.controllers.ts";
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
@@ -52,6 +53,13 @@ routes.get(
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
 	getDocumentViewController,
+);
+
+routes.post(
+	"/{:docid}/chat",
+	authMiddleware,
+	roleMiddleware(["admin", "user", "moderator", "support"]),
+	chatToDocumentController,
 );
 
 export { routes as documentRoutes };

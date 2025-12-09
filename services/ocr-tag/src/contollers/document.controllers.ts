@@ -20,7 +20,7 @@ import {
 import { AuditLogModel } from "../models/audit.model.ts";
 import { v4 as uuidv4 } from "uuid";
 import { workerQueue } from "../core/workerQueue.ts";
-import { chatWorkflow } from "../services/chatService.ts";
+import { chatService } from "../services/chatService.ts";
 
 export const createDocumentController = async (
 	request: Request,
@@ -399,12 +399,15 @@ export const getDocumentViewController = async (
 	}
 };
 
-export const chatToDocuments = async (request: Request, response: Response) => {
+export const chatToDocumentController = async (
+	request: Request,
+	response: Response,
+) => {
 	try {
 		const user = request.user;
 		const { docid } = request.params;
 		const validateRequest = chatDocumentSchema.safeParse(request.body);
-
+		console.log(validateRequest.data);
 		if (validateRequest.error) {
 			return response.status(400).json({ error: "Bad request" });
 		}
@@ -421,20 +424,11 @@ export const chatToDocuments = async (request: Request, response: Response) => {
 		response.setHeader("Cache-Control", "no-cache");
 		response.setHeader("Connection", "keep-alive");
 
-		const events = chatWorkflow.streamEvents(
-			{
-				docid: docExist._id.toString(),
-				query: validateRequest.data.query,
-				context: [],
-				messages: [],
-			},
-			{
-				version: "v2",
-				streamMode: "messages",
-			},
+		return await chatService(
+			docExist._id.toString(),
+			validateRequest.data.query,
+			response,
 		);
-
-		return response.status(200).json({ message: "Chat response" });
 	} catch (error) {
 		console.error(error);
 		return response.status(500).json({ error: "Internal server error" });

@@ -3,7 +3,9 @@ import { Schema, model } from "mongoose";
 export const documentEmbeddingSchema = new Schema(
 	{
 		userId: Schema.ObjectId,
-		documentId: Schema.ObjectId,
+		documentId: {
+			type: Schema.ObjectId,
+		},
 		embedding: {
 			type: [Number],
 			required: true,
@@ -30,6 +32,10 @@ documentEmbeddingSchema.searchIndex({
 				similarity: "dotProduct",
 				quantization: "scalar",
 			},
+			{
+				type: "filter",
+				path: "documentId",
+			},
 		],
 	},
 });
@@ -38,7 +44,6 @@ const DocumentEmbeddingModel = model(
 	"DocumentEmbedding",
 	documentEmbeddingSchema,
 );
-
 DocumentEmbeddingModel.createSearchIndexes().then(() => {
 	console.log("Document embedding search index created");
 });

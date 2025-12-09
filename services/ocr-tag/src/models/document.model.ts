@@ -43,6 +43,8 @@ export const documentSchema = new Schema(
 	},
 );
 
+documentSchema.index({ ownerId: 1, folderId: 1, createdBy: 1 });
+
 documentSchema.searchIndex({
 	name: "documentsVectorIndex",
 	type: "vectorSearch",
@@ -60,6 +62,10 @@ documentSchema.searchIndex({
 });
 
 const DocumentModel = model("Document", documentSchema);
+
+DocumentModel.createIndexes().then(() => {
+	console.log("Document indexes created");
+});
 
 DocumentModel.createSearchIndexes().then(() => {
 	console.log("Document search index created");
