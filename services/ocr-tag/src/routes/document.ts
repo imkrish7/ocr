@@ -7,6 +7,7 @@ import {
 	updateDocumentUploadController,
 	getDocumentViewController,
 	chatToDocumentController,
+	getDocumentDeletedController,
 } from "../contollers/document.controllers.ts";
 import { authMiddleware } from "../middleware/authMiddleware.ts";
 import { roleMiddleware } from "../middleware/roleMiddleware.ts";
@@ -60,6 +61,13 @@ routes.post(
 	authMiddleware,
 	roleMiddleware(["admin", "user", "moderator", "support"]),
 	chatToDocumentController,
+);
+
+routes.post(
+	"/{:docid}/delete",
+	authMiddleware,
+	roleMiddleware(["admin", "user"]),
+	getDocumentDeletedController,
 );
 
 export { routes as documentRoutes };

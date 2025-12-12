@@ -3,7 +3,7 @@ import { DocumentEmbeddingModel } from "../models/documentEmbedding.model.ts";
 import { getQueryEmbedding } from "./embedService.ts";
 import { ChatOllama } from "@langchain/ollama";
 import { type BaseMessage } from "@langchain/core/messages";
-import { MessagesZodMeta, StateGraph } from "@langchain/langgraph";
+import { StateGraph } from "@langchain/langgraph";
 import { registry } from "@langchain/langgraph/zod";
 import type { Response } from "express";
 import {
@@ -13,6 +13,8 @@ import {
 	SSE_DONE_MESSAGE,
 	SSE_LINE_DELIMITER,
 } from "../types/graph.ts";
+
+import { Types } from "mongoose";
 
 const llm = new ChatOllama({
 	model: "llama3.2",
@@ -38,7 +40,7 @@ const retrieval = async (state: z.infer<typeof graphState>) => {
 				exact: true,
 				path: "embedding",
 				limit: 10,
-				filter: { documentId: { $eq: docid } },
+				filter: { documentId: { $eq: new Types.ObjectId(docid) } },
 			},
 		},
 	]);
@@ -48,14 +50,19 @@ const retrieval = async (state: z.infer<typeof graphState>) => {
 
 const summarizeContext = async (state: z.infer<typeof graphState>) => {
 	const { context } = state;
+	console.log("Summarize", context);
 	const message = await llm.invoke([
-		{ role: "system", content: "You are a helpfull assistant" },
+		{
+			role: "system",
+			content:
+				"You are a helpfull assistant. Be polite and concise. If question is not relevant to context, please provide a helpfull questions from context otherwise answer from the context",
+		},
 		{ role: "assistant", content: `context: ${context.join("\n")}` },
 		{ role: "user", content: `Question: ${state.query}` },
 		{
 			role: "assistant",
 			content:
-				"If question is not relevant to context, please provide a helpfull questions otherwise answer from the context",
+				"If question is not relevant to context, please provide a helpfull questions from context otherwise answer from the context",
 		},
 	]);
 	return {
@@ -87,6 +94,7 @@ export const chatService = async (
 	query: string,
 	response: Response,
 ) => {
+	console.log(docid, query);
 	const events = chatWorkflow.streamEvents(
 		{
 			docid,
@@ -102,7 +110,6 @@ export const chatService = async (
 
 	for await (const event of events) {
 		if (event.event === "on_chat_model_stream") {
-			console.log(event);
 			const token = event.data.chunk;
 			if (token) {
 				const text = token.content;

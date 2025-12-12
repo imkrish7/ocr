@@ -268,6 +268,7 @@ export const getPresignedURLDocumentController = async (
 	response: Response,
 ) => {
 	try {
+		const user = request.user;
 		const { folderId } = request.params;
 
 		if (!folderId) {
@@ -300,6 +301,8 @@ export const getPresignedURLDocumentController = async (
 				status: "PENDING",
 				path: filename,
 			},
+			ownerId: folderExist.ownerId,
+			createdBy: user?.sub,
 		});
 		await newdoc.save();
 		return response.status(200).json({
@@ -399,6 +402,41 @@ export const getDocumentViewController = async (
 	}
 };
 
+export const getDocumentDeletedController = async (
+	request: Request,
+	response: Response,
+) => {
+	try {
+		const user = request.user;
+		const { docid } = request.params;
+
+		if (!docid) {
+			return response.status(400).json({ error: "Bad request" });
+		}
+
+		const document = await DocumentModel.findById(docid);
+
+		if (!document) {
+			return response.status(404).json({ error: "Document not found" });
+		}
+
+		console.log(document);
+		if (
+			document.createdBy?.toString() === user?.sub ||
+			document.ownerId?.toString() === user?.sub
+		) {
+			await DocumentModel.findByIdAndDelete(document._id);
+		}
+
+		return response
+			.status(200)
+			.json({ message: "Document Deleted successfully" });
+	} catch (error) {
+		console.error(error);
+		return response.status(500).json({ error: "Internal server error!" });
+	}
+};
+
 export const chatToDocumentController = async (
 	request: Request,
 	response: Response,
@@ -407,7 +445,7 @@ export const chatToDocumentController = async (
 		const user = request.user;
 		const { docid } = request.params;
 		const validateRequest = chatDocumentSchema.safeParse(request.body);
-		console.log(validateRequest.data);
+
 		if (validateRequest.error) {
 			return response.status(400).json({ error: "Bad request" });
 		}
